@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title %}Recruitment Platform{% endblock %}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            font-family: Arial, sans-serif;
+        }
+        main {
+            display: flex;
+            justify-content: space-between;
+            padding: 20px;
+        }
+        .chatbot {
+            flex: 1;
+            margin-right: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 15px;
+            height: 400px;
+            overflow-y: auto;
+        }
+        .upload-section {
+            flex: 2;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .upload-box, .display-box {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 15px;
+        }
+        .upload-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .upload-box input[type="file"] {
+            margin-top: 10px;
+        }
+        .display-box {
+            background-color: #f9f9f9;
+        }
+        footer {
+            text-align: center;
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f1f1f1;
+            border-top: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Recruitment Platform</h1>
+        <nav>
+            <a href="/">Home</a>
+            <p>
+                {% if user %}
+                    <a href="/logout">Logout</a>
+                    <p>Welcome {{ user.email }}!</p>
+                {% else %}
+                    <a href="/register">Register</a>
+                    <a href="/login">Login</a>
+                {% endif %}
+            </p>
+        </nav>
+    </header>
+    <main>
+        <!-- Chatbot Section -->
+        <div class="chatbot">
+            <h3>Chatbot</h3>
+            <div id="chat-content">
+                <p><strong>Bot:</strong> Hello! How can I assist you today?</p>
+            </div>
+            <textarea id="chat-input" rows="3" placeholder="Type your message..."></textarea>
+            <button id="send-chat">Send</button>
+        </div>
+
+        <!-- Upload and Display Section -->
+        <div class="upload-section">
+            <div class="upload-box">
+                <h3>Upload Your File</h3>
+                <input type="file" id="file-upload">
+            </div>
+            <div class="display-box">
+                <h3>Cover Letter</h3>
+                <p id="cover-letter">No content available.</p>
+            </div>
+            <div class="display-box">
+                <h3>Skills</h3>
+                <p id="skills">No content available.</p>
+            </div>
+        </div>
+    </main>
+    <footer>
+        <p>© 2024 Recruitment Platform</p>
+    </footer>
+    <!-- <script>
+        document.getElementById('send-chat').addEventListener('click', () => {
+            const chatInput = document.getElementById('chat-input');
+            const chatContent = document.getElementById('chat-content');
+
+            if (chatInput.value.trim()) {
+                const userMessage = `<p><strong>You:</strong> ${chatInput.value}</p>`;
+                chatContent.innerHTML += userMessage;
+
+                // Simulate a bot response
+                const botResponse = `<p><strong>Bot:</strong> Thank you for your message!</p>`;
+                chatContent.innerHTML += botResponse;
+
+                chatInput.value = '';
+                chatContent.scrollTop = chatContent.scrollHeight;
+            }
+        });
+    </script> -->
+    
+
+
+
+    <script>
+        const chatHistory = [];
+
+        async function sendMessageToChatbot() {
+            const chatInput = document.getElementById('chat-input');
+            const chatContent = document.getElementById('chat-content');
+
+            if (chatInput.value.trim()) {
+                const userMessage = { sender: "You", message: chatInput.value };
+                chatHistory.push(userMessage);
+                updateChatContent();
+
+                try {
+                    const response = await fetch("http://localhost:8001/chatbot/", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                        body: new URLSearchParams({ message: chatInput.value }),
+                    });
+
+                    if (!response.ok) {
+                        throw new Error("Failed to communicate with chatbot");
+                    }
+
+                    const data = await response.json();
+                    const botMessage = { sender: "Bot", message: data.response };
+                    chatHistory.push(botMessage);
+                    updateChatContent();
+                } catch (error) {
+                    console.error(error);
+                    chatHistory.push({
+                        sender: "Error",
+                        message: "Failed to communicate with chatbot. Try again later.",
+                    });
+                    updateChatContent();
+                } finally {
+                    chatInput.value = "";
+                }
+            }
+        }
+
+        function updateChatContent() {
+            const chatContent = document.getElementById('chat-content');
+            chatContent.innerHTML = chatHistory
+                .map(msg => `<p><strong>${msg.sender}:</strong> ${msg.message}</p>`)
+                .join("");
+            chatContent.scrollTop = chatContent.scrollHeight;
+        }
+
+        document.getElementById('send-chat').addEventListener('click', sendMessageToChatbot);
+    </script>
+    
+
+
+
+</body>
+</html>
