@@ -1,12 +1,13 @@
+import json
 from fastapi import FastAPI, Request, Form
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from routers import users
 from database.connection import get_snowflake_connection
 from fastapi import FastAPI, Form, HTTPException
 from werkzeug.security import generate_password_hash
-from database.queries import insert_user
+from database.queries import get_user_by_email, insert_user
 
 
 # Création de l'application FastAPI
@@ -53,14 +54,15 @@ async def login_page(request: Request):
 async def login_user(email: str = Form(...), password: str = Form(...)):
     # Vérifier les informations d'identification
     user = get_user_by_email(email)
-    if user:
-        if check_password_hash(user["password"], password):
-            return {"message": "User logged in successfully!"}
-    else:
 
-    return {"error": "Invalid credentials. Please try again."}
+    # Créer une réponse de redirection
+    redirect_url = "/accueil"
+    response = RedirectResponse(url=redirect_url, status_code=302)
 
+    # Définir un cookie avec les informations de l'utilisateur
+    response.set_cookie(key="user", value=json.dumps(user), httponly=True)
 
+    return response
 
 @app.get("/login", response_class=HTMLResponse)
 async def login_page(request: Request):
