@@ -5,11 +5,8 @@
 {% block content %}
 <h2>Register</h2>
 <form action="/api/register" method="post">
-    <label for="first_name">First Name:</label>
-    <input type="text" id="first_name" name="first_name" required><br>
-
-    <label for="last_name">Last Name:</label>
-    <input type="text" id="last_name" name="last_name" required><br>
+    <label for="name">Name:</label>
+    <input type="text" id="name" name="name" required><br>
 
     <label for="email">Email:</label>
     <input type="email" id="email" name="email" required><br>
@@ -20,6 +17,15 @@
     <label for="confirm_password">Confirm Password:</label>
     <input type="password" id="confirm_password" name="confirm_password" required><br>
 
+    <label for="role">Role:</label>
+    <select id="role" name="role">
+        <option value="candidat">Candidat</option>
+        <option value="recruteur">Recruteur</option>
+        <option value="admin">Admin</option>
+    </select><br>
+
     <button type="submit">Register</button>
+</form>
+
 </form>
 {% endblock %}

@@ -3,6 +3,10 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from routers import users
+from database.connection import get_snowflake_connection
+from fastapi import FastAPI, Form, HTTPException
+from werkzeug.security import generate_password_hash
+from database.queries import insert_user
 
 
 # Création de l'application FastAPI
@@ -20,15 +24,26 @@ async def home(request: Request):
 async def register_page(request: Request):
     return templates.TemplateResponse("register.html", {"request": request})
 
+
 @app.post("/register")
 async def register_user(
-    first_name: str = Form(...), last_name: str = Form(...),
-    email: str = Form(...), password: str = Form(...),
-    confirm_password: str = Form(...)
+    name: str = Form(...), 
+    email: str = Form(...), 
+    password: str = Form(...), 
+    confirm_password: str = Form(...), 
+    role: str = Form("candidat")
 ):
     if password != confirm_password:
-        return {"error": "Passwords do not match!"}
-    return {"message": f"Welcome {first_name} {last_name}! Registration successful."}
+        raise HTTPException(status_code=400, detail="Passwords do not match!")
+    # Hash du mot de passe pour la sécurité
+    password_hash = generate_password_hash(password)
+    try:
+        # Insérer l'utilisateur dans la base de données
+        insert_user(name, email, password_hash, role)
+        return {"message": "User registered successfully!"}
+    except Exception as e:
+        # Gestion des erreurs
+        raise HTTPException(status_code=400, detail=f"Registration failed: {str(e)}")
 
 @app.get("/login", response_class=HTMLResponse)
 async def login_page(request: Request):
@@ -44,6 +59,13 @@ async def login_page(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
 
 app.include_router(users.router, prefix="/api", tags=["users"])
+try:
+    conn = get_snowflake_connection()
+    print("Connexion à Snowflake réussie !")
+    conn.close()
+except Exception as e:
+    print(f"Erreur lors de la connexion à Snowflake : {e}")
+
 
 
 if __name__ == "__main__":
