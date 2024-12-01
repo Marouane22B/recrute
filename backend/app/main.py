@@ -51,9 +51,17 @@ async def login_page(request: Request):
 
 @app.post("/login")
 async def login_user(email: str = Form(...), password: str = Form(...)):
-    if email == "test@example.com" and password == "password":
-        return {"message": "Login successful!"}
+    # Vérifier les informations d'identification
+    user = get_user_by_email(email)
+    if user:
+        if check_password_hash(user["password"], password):
+            return {"message": "User logged in successfully!"}
+    else:
+
     return {"error": "Invalid credentials. Please try again."}
+
+
+
 @app.get("/login", response_class=HTMLResponse)
 async def login_page(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})
