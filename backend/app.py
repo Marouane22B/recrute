@@ -9,6 +9,7 @@ from utils.class_object import singleton
 
 # Route Imports
 from routes.auth import auth_router
+from routes.chatbot import chat_router
 
 @singleton
 class App:
@@ -33,6 +34,7 @@ class App:
 
         # Set Routes
         self.app.include_router(auth_router)
+        self.app.include_router(chat_router)
 
     # GET app
     def get_app(self):
