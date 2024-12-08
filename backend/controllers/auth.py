@@ -50,7 +50,8 @@ class AuthController:
                 "name": params.name,
                 "email": params.email,
                 "password": "",
-                "role": "condidat"
+                "role": "condidat",
+                "plan": 0
             }
 
         except Exception as e:
@@ -85,7 +86,8 @@ class AuthController:
                     "name": result[1],
                     "email": result[2],
                     "password": result[3],
-                    "role": result[4]
+                    "role": result[4],
+                    "plan": result[8]
                 }
             else:
                 print("User not found in Snowflake.")
@@ -97,4 +99,65 @@ class AuthController:
             cursor.close()
             conn.close()
         
-        
+    async def update_user_plan(self, user_id: int, new_plan: int):
+        """
+        Met à jour le plan d'un utilisateur dans la table Users de Snowflake.
+
+        Args:
+            user_id (int): L'identifiant de l'utilisateur dont le plan doit être mis à jour.
+            new_plan (int): La nouvelle valeur du plan.
+
+        Returns:
+            dict: Détails de l'utilisateur après la mise à jour ou un message d'erreur.
+        """
+        conn = get_snowflake_connection()
+        try:
+            cursor = conn.cursor()
+
+            # 1️⃣ Requête pour mettre à jour le plan de l'utilisateur
+            update_query = """
+                UPDATE Users
+                SET plan = %s
+                WHERE user_id = %s;
+            """
+            
+            # Affiche la requête et les paramètres
+            print("Executing SQL query:", update_query)
+            print("With parameters:", (new_plan, user_id))
+            
+            # Exécuter la requête d'UPDATE
+            cursor.execute(update_query, [new_plan, user_id])
+
+            # 2️⃣ Requête pour récupérer l'utilisateur mis à jour
+            select_query = """
+                SELECT user_id, name, email, plan 
+                FROM Users 
+                WHERE user_id = %s;
+            """
+            
+            print("Executing SQL query:", select_query)
+            print("With parameters:", (user_id,))
+            
+            # Exécute la requête SELECT
+            cursor.execute(select_query, [user_id])
+            result = cursor.fetchone()
+
+            if result:
+                print("User's plan updated successfully.")
+                return {
+                    "id": result[0],
+                    "name": result[1],
+                    "email": result[2],
+                    "plan": result[3]
+                }
+            else:
+                print("User not found or no rows updated in Snowflake.")
+                return {"status": "error", "message": "User not found or no changes made."}
+
+        except Exception as e:
+            print(f"Erreur lors de la mise à jour du plan de l'utilisateur dans Snowflake : {e}")
+            raise e
+
+        finally:
+            cursor.close()
+            conn.close()
