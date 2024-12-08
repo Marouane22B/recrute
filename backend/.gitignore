@@ -1,3 +1,17 @@
-env
-
+# Ignorer les fichiers compilés Python
+*.pyc
 __pycache__/
+
+# Ignorer d'autres fichiers courants
+*.pyo
+*.pyd
+*.db
+*.sqlite
+
+# Ignorer les environnements virtuels
+env/
+venv/
+
+# Ignorer les fichiers de configuration d'IDE
+.idea/
+.vscode/
