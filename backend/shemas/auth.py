@@ -4,7 +4,10 @@ from pydantic import field_validator, model_validator
 
 # Sign Up Params
 class SignUpParams(BaseModel):
-    pass
+    name: str
+    email: EmailStr
+    password: str
+    
     
 # Sign In Params
 class SignInParams(BaseModel):
