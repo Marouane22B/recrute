@@ -8,4 +8,5 @@ class SignUpParams(BaseModel):
     
 # Sign In Params
 class SignInParams(BaseModel):
-    pass
+    email: EmailStr
+    password: str

@@ -7,6 +7,8 @@ charset-normalizer==3.4.0
 click==8.1.7
 colorama==0.4.6
 cryptography==44.0.0
+dnspython==2.7.0
+email_validator==2.2.0
 fastapi==0.115.5
 filelock==3.16.1
 h11==0.14.0
