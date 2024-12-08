@@ -19,6 +19,14 @@ class App:
             debug=True)
         # Set the database connection
         
+        # Set CORS
+        self.app.add_middleware(
+            CORSMiddleware,
+            allow_origins=["*"],
+            allow_credentials=True,
+            allow_methods=["*"],
+            allow_headers=["*"],
+        )
 
         # Set Static Files public dans la racine du projet
         self.app.mount("/public", StaticFiles(directory=os.path.join(os.path.dirname(__file__), 'public')), name="public")
